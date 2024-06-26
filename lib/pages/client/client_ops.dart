@@ -88,7 +88,7 @@ class _ClientsOpsState extends State<ClientsOps> {
                     if (value!.isEmpty) {
                       return "Phone is Required";
                     }
-                    if (value.length < 11) {
+                    if (!(value.length == 11)) {
                       phoneFocusNode.requestFocus();
                       return 'Invalid Phone Number, must be 11 numbers';
                     }
@@ -140,17 +140,18 @@ class _ClientsOpsState extends State<ClientsOps> {
             whereArgs: [widget.clients?.id],
           );
           sqlHelper.backupDatabase();
-          // SqlHelper.updateClient(widget.clients!);
         } else {
           var sqlHelper = GetIt.I.get<SqlHelper>();
-          await sqlHelper.db!.insert("Clients", {
-            "name": nameController?.text,
-            "email": emailController?.text,
-            "phone": phoneController?.text,
-            "address": addressController?.text,
-          });
+          await sqlHelper.db!.insert(
+            "Clients",
+            {
+              "name": nameController?.text,
+              "email": emailController?.text,
+              "phone": phoneController?.text,
+              "address": addressController?.text,
+            },
+          );
           sqlHelper.backupDatabase();
-          // SqlHelper.addClient(widget.clients!);
         }
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

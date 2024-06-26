@@ -93,7 +93,7 @@ class SqlHelper {
           productId integer,
           productCount integer,
           foreign key(productId) references Products(id)
-          on delete restrict
+          on delete cascade
           ) 
           """);
 
@@ -162,7 +162,7 @@ class SqlHelper {
       if (await File(backupPath).exists()) {
         // Copy backup file to original database path
         await File(backupPath).copy(path);
-        print('Database restored successfully');
+        print('Database restored successfully from backup');
         return true;
       } else {
         print('There is no Backup database file');
@@ -201,8 +201,11 @@ class SqlHelper {
                   child: const Text('Cancel'),
                   onPressed: () async {
                     Navigator.of(context).pop(false);
-                    // await deleteOldDatabase();
-                    await clearDatabase();
+                    if (getBackupDatabasePath()
+                        .toString()
+                        .contains("pos_backup.db")) {
+                      await clearDatabase();
+                    }
                     await createTables();
                   },
                 ),
@@ -240,11 +243,11 @@ class SqlHelper {
   Future<void> clearDatabase() async {
     try {
       await db!.transaction((txn) async {
-        await txn.rawQuery('DELETE FROM Categories');
-        await txn.rawQuery('DELETE FROM Products');
-        await txn.rawQuery('DELETE FROM Clients');
-        await txn.rawQuery('DELETE FROM Orders');
         await txn.rawQuery('DELETE FROM orderProductItems');
+        await txn.rawQuery('DELETE FROM Products');
+        await txn.rawQuery('DELETE FROM Categories');
+        await txn.rawQuery('DELETE FROM Orders');
+        await txn.rawQuery('DELETE FROM Clients');
       });
       print('Database content cleared');
     } catch (e) {

@@ -1,3 +1,4 @@
+import '../models/order.dart';
 import '../pages/client/clients.dart';
 import '../pages/product/products.dart';
 import '../pages/all_sales_page.dart';
@@ -21,6 +22,7 @@ class _HomePageState extends State<HomePage> {
   bool isLoading = true;
   bool isTableInitialized = false;
   bool isDBRestored = false;
+  List<Order>? orders;
 
   @override
   void initState() {
@@ -29,6 +31,31 @@ class _HomePageState extends State<HomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       initializeTables();
     });
+  }
+
+  void getOrders() async {
+    try {
+      var sqlHelper = GetIt.I.get<SqlHelper>();
+      var data = await sqlHelper.db!.rawQuery("""
+      select O.* ,C.name as clientName,C.phone as clientPhone,C.address as clientAddress
+      from Orders O
+      inner join Clients C
+      where O.clientId = C.id
+      """);
+
+      if (data.isNotEmpty) {
+        orders = [];
+        for (var item in data) {
+          orders!.add(Order.fromJson(item));
+        }
+      } else {
+        orders = [];
+      }
+    } catch (e) {
+      print('Error In get data from orders $e');
+      orders = [];
+    }
+    setState(() {});
   }
 
   void initializeTables() async {
@@ -102,7 +129,8 @@ class _HomePageState extends State<HomePage> {
                         ),
                         const SizedBox(height: 10),
                         headerItem('Exchange rate', '1USD = 50 EGP'),
-                        headerItem('Today\'s sales', '1000 EGP'),
+                        headerItem(
+                            'Today\'s sales', calcTodaySales().toString()),
                       ],
                     ),
                   ),
@@ -156,9 +184,14 @@ class _HomePageState extends State<HomePage> {
                     color: Colors.green,
                     iconData: Icons.shopping_basket,
                     label: 'New Sale',
-                    onTap: () {
-                      Navigator.push(context,
+                    onTap: () async {
+                      final newOrder = await Navigator.push(context,
                           MaterialPageRoute(builder: (ctx) => const SaleOp()));
+                      if (newOrder != null) {
+                        setState(() {
+                          orders?.add(newOrder);
+                        });
+                      }
                     },
                   ),
                   GridViewItem(
@@ -216,5 +249,15 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+
+  double calcTodaySales() {
+    double total = 0;
+    for (var order in orders ?? []) {
+      if (order.totalPrice != null) {
+        total += order.totalPrice!;
+      }
+    }
+    return total;
   }
 }

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import '../helpers/sql_helper.dart';
 import '../models/order.dart';
+import '../models/order_item.dart';
 import '../widgets/dash_line.dart';
 import 'currency_selection.dart';
 
@@ -20,6 +21,9 @@ class _AllSalesState extends State<AllSales> {
   late String currencyText;
   Currency currentCurrency = Currency.USD; // Default currency is USD in App
   Currency selectedCurrency = Currency.EGP;
+  List<OrderItem> selectedOrderItem = [];
+  late String selectedCurrencyText;
+
   @override
   void initState() {
     currencyText = currencyToString(currentCurrency);
@@ -158,17 +162,24 @@ class _AllSalesState extends State<AllSales> {
                                                   CrossAxisAlignment.stretch,
                                               children: [
                                                 Text("product name"),
+                                                //todo: remove the static text
                                                 Text("2 x 20.0 USD"),
                                               ],
                                             ),
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.end,
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.end,
                                               children: [
-                                                Text(
-                                                    "Subtotal: ${order.totalPrice} USD"),
-                                                Text(
-                                                    "Discount: - ${order.discount}%"),
+                                                Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.end,
+                                                  children: [
+                                                    Text(
+                                                        "Subtotal: ${order.totalPrice} USD"),
+                                                    Text(
+                                                        "Discount: - ${order.discount! * 100}%"),
+                                                  ],
+                                                ),
                                               ],
                                             ),
                                             const SizedBox(height: 20),
@@ -183,8 +194,8 @@ class _AllSalesState extends State<AllSales> {
                                                       CrossAxisAlignment.end,
                                                   children: [
                                                     Text(
-                                                        "Total: ${order.totalPrice}"),
-                                                    Text("Paid"),
+                                                        "Total: ${calculateProductPriceAfterDiscount(discount: order.discount!, total: order.totalPrice!)}"),
+                                                    const Text("Paid"),
                                                   ],
                                                 ),
                                               ],
@@ -203,101 +214,41 @@ class _AllSalesState extends State<AllSales> {
                       }).toList() ??
                       [],
                 ),
-
-      /*Column(
-        children: [
-          const SizedBox(height: 20),
-          Padding(
-            padding: inputPadding,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                GestureDetector(
-                  child: Card(
-                    color: const Color(0xffF5F5F5),
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Column(
-                        children: [
-                          Container(
-                            width: double.maxFinite,
-                            padding: inputPadding,
-                            color: const Color(0xffFFF2CD),
-                            child: Text(
-                              currencyConvertorLine(currentCurrency),
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xffF27D10),
-                              ),
-                            ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text("Receipt Name"),
-                              IconButton(
-                                  onPressed: () {},
-                                  icon: const Icon(Icons.more_vert_rounded)),
-                            ],
-                          ),
-                          // const SizedBox(height: 8),
-                          const Row(
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.only(right: 5),
-                                child: CircleAvatar(
-                                  radius: 16,
-                                  child: Icon(Icons.person),
-                                ),
-                              ),
-                              const Text("Unnamed Clinet"),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          const DashedSeparator(),
-                          const SizedBox(height: 20),
-                          const Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("product name"),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("2 x 20.0 USD"),
-                                  Text("40.0 USD"),
-                                ],
-                              )
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          const DashedSeparator(),
-                          const SizedBox(height: 20),
-                          const Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text("Total: 40.0 USD"),
-                                  Text("Paid"),
-                                ],
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),*/
     );
+  }
+
+  double calculateProductPriceAfterDiscount(
+      {required double discount, required double total}) {
+    return (total - (total * discount));
+  }
+
+  convertPrice(var price, String fromCurrency, String toCurrency) {
+    final Map<String, double> exchangeRates = {
+      'EGPtoUSD': 0.021,
+      'EGPtoEUR': 0.02,
+      'USDtoEUR': 0.93,
+      'EURtoUSD': 1.07,
+      'USDtoEGP': 47.66,
+      'EURtoEGP': 51.13,
+    };
+
+    // if (fromCurrency == toCurrency) return price;
+    switch ("${fromCurrency}to$toCurrency") {
+      case 'EGPtoUSD':
+        return "${(price * exchangeRates['EGPtoUSD']).toStringAsFixed(4)} $selectedCurrencyText";
+      case 'EGPtoEUR':
+        return "${(price * exchangeRates['EGPtoEUR']).toStringAsFixed(4)} $selectedCurrencyText";
+      case 'USDtoEUR':
+        return "${(price * exchangeRates['USDtoEUR']).toStringAsFixed(4)} $selectedCurrencyText";
+      case 'EURtoUSD':
+        return "${(price * exchangeRates['EURtoUSD']).toStringAsFixed(4)} $selectedCurrencyText";
+      case 'USDtoEGP':
+        return "${(price * exchangeRates['USDtoEGP']).toStringAsFixed(4)} $selectedCurrencyText";
+      case 'EURtoEGP':
+        return "${(price * exchangeRates['EURtoEGP']).toStringAsFixed(4)} $selectedCurrencyText";
+      default:
+        return price;
+    }
   }
 
   String currencyConvertorLine(Currency currency) {
@@ -322,44 +273,6 @@ class _AllSalesState extends State<AllSales> {
     }
   }
 
-  /*Padding(
-        padding: defaultPadding,
-        child: Column(
-          children: [
-            SearchTextField(
-              rawQueryText: (value) async {
-                var sqlHelper = GetIt.I.get<SqlHelper>();
-                await sqlHelper.db!.rawQuery("""
-                SELECT * FROM Orders
-                WHERE label LIKE '%$value%';
-                """);
-              },
-            ),
-            const SizedBox(height: 10),
-            Expanded(
-              child: AppTable(
-                minWidth: 1100,
-                columns: const [
-                  DataColumn(label: Text("Id")),
-                  DataColumn(label: Text("Label")),
-                  DataColumn(label: Text("Total Price")),
-                  DataColumn(label: Text("Discount")),
-                  DataColumn(label: Text("Client ID")),
-                  DataColumn(label: Text("Client Name")),
-                  DataColumn(label: Text("Client Phone")),
-                  DataColumn(label: Text("Client Address")),
-                  DataColumn(label: Center(child: Text("Actions"))),
-                ],
-                source: OrdersTableSource(
-                  orders: orders,
-                  onShow: (order) {},
-                  onDelete: (order) {},
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),*/
   Future<void> onDeleteRow(int id) async {
     try {
       var dialogResult = await showDialog(
@@ -397,67 +310,21 @@ class _AllSalesState extends State<AllSales> {
           where: "id = ?",
           whereArgs: [id],
         );
+        sqlHelper.backupDatabase();
+        // if (result > 0) {
+        //   getOrders();
+        //   setState(() {});
+        // }
         if (result > 0) {
-          getOrders();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Order deleted successfully")),
+          );
+          getOrders(); // Refresh the list after deletion
         }
+        print(">>>>>>>>>>> selected order & orderItem are deleted : $result");
       }
     } catch (e) {
       print('Error in delete Receipt: $e');
     }
   }
-}
-
-class OrdersTableSource extends DataTableSource {
-  List<Order>? orders;
-  void Function(Order) onShow;
-  void Function(Order) onDelete;
-
-  OrdersTableSource({
-    required this.orders,
-    required this.onShow,
-    required this.onDelete,
-  });
-
-  @override
-  DataRow? getRow(int index) {
-    return DataRow2(
-      cells: [
-        DataCell(Text("${orders?[index].id}")),
-        DataCell(Text("${orders?[index].label}")),
-        DataCell(Text("${orders?[index].totalPrice}")),
-        DataCell(Text("${orders?[index].discount}")),
-        DataCell(Text("${orders?[index].clientId}")),
-        DataCell(Text("${orders?[index].clientName}")),
-        DataCell(Text("${orders?[index].clientPhone}")),
-        DataCell(Text("${orders?[index].clientAddress}")),
-        DataCell(Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconButton(
-              onPressed: () async {
-                onShow.call(orders![index]);
-              },
-              icon: const Icon(Icons.visibility),
-            ),
-            IconButton(
-              onPressed: () async {
-                onDelete.call(orders![index]);
-              },
-              icon: const Icon(Icons.delete),
-              color: Colors.red,
-            ),
-          ],
-        )),
-      ],
-    );
-  }
-
-  @override
-  bool get isRowCountApproximate => false;
-
-  @override
-  int get rowCount => orders?.length ?? 0;
-
-  @override
-  int get selectedRowCount => 0;
 }

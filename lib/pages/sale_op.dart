@@ -1,7 +1,9 @@
-import 'package:final_project/utils/constants.dart';
-import 'package:final_project/widgets/clients_drop_down.dart';
-import 'package:final_project/widgets/dash_line.dart';
-import 'package:final_project/widgets/discount_textField.dart';
+import 'package:get/get.dart';
+
+import '../utils/constants.dart';
+import '../widgets/clients_drop_down.dart';
+import '../widgets/dash_line.dart';
+import '../widgets/discount_textField.dart';
 
 import '../models/order.dart';
 import '../models/order_item.dart';
@@ -48,7 +50,8 @@ class _SaleOpState extends State<SaleOp> {
     selectedClientId = widget.order?.clientId;
     currencyText = currencyToString(currentCurrency);
     selectedCurrencyText = currencyToString(selectedCurrency);
-    discountController = TextEditingController(text: "");
+    discountController = TextEditingController(
+        text: widget.order == null ? "" : "${widget.order!.discount! * 100}");
     getProducts();
     setState(() {});
   }
@@ -215,7 +218,7 @@ class _SaleOpState extends State<SaleOp> {
                             onChange: (discountValue) {
                               if (discountController.text.isNotEmpty) {
                                 discountValue = discountController.text;
-                                discount = double.parse(discountValue);
+                                discount = double.parse(discountValue) / 100;
                                 DiscountTextField.decorationContainer = true;
                               } else {
                                 DiscountTextField.decorationContainer = false;
@@ -274,34 +277,85 @@ class _SaleOpState extends State<SaleOp> {
 
   Future<void> onSetOrder() async {
     try {
-      var sqlHelper = GetIt.I.get<SqlHelper>();
-      var orderId = await sqlHelper.db!.insert(
-        "Orders",
-        {
-          "label": orderLabel,
-          "totalPrice": calculateProductPrice(),
-          "discount": discount,
-          "clientId": selectedClientId
-        },
-      );
+      Order newOrder;
+      if (widget.order != null) {
+        //update
+        var sqlHelper = GetIt.I.get<SqlHelper>();
+        var orderId = await sqlHelper.db!.update(
+          "Orders",
+          {
+            "label": orderLabel,
+            "totalPrice": calculateProductPrice(),
+            "discount": discount,
+            "clientId": selectedClientId
+          },
+          where: 'id = ?',
+          whereArgs: [widget.order?.id],
+        );
+        newOrder = Order(
+          id: orderId,
+          label: orderLabel,
+          totalPrice: calculateProductPrice(),
+          discount: discount,
+          clientId: selectedClientId,
+        );
 
-      var batch = sqlHelper.db!.batch();
-      for (var orderItem in selectedOrderItem) {
-        batch.insert('orderProductItems', {
-          "orderId": orderId,
-          "productId": orderItem.productId,
-          "productCount": orderItem.productCount ?? 0,
-        });
-        sqlHelper.backupDatabase();
-        var result = await batch.commit();
-        print(">>>>>>>>>>> selected order items ids: $result");
+        var batch = sqlHelper.db!.batch();
+        for (var orderItem in selectedOrderItem) {
+          batch.update(
+            'orderProductItems',
+            {
+              "orderId": orderId,
+              "productId": orderItem.productId,
+              "productCount": orderItem.productCount ?? 0,
+            },
+            where: 'id = ?',
+            whereArgs: [orderId],
+          );
+          sqlHelper.backupDatabase();
+          var result = await batch.commit();
+          print(">>>>>>>>>>> Update selected order items ids: $result");
+        }
+      } else {
+        var sqlHelper = GetIt.I.get<SqlHelper>();
+        var orderId = await sqlHelper.db!.insert(
+          "Orders",
+          {
+            "label": orderLabel,
+            "totalPrice": calculateProductPrice(),
+            "discount": discount,
+            "clientId": selectedClientId
+          },
+        );
+        newOrder = Order(
+          id: orderId,
+          label: orderLabel,
+          totalPrice: calculateProductPrice(),
+          discount: discount,
+          clientId: selectedClientId,
+        );
+
+        var batch = sqlHelper.db!.batch();
+        for (var orderItem in selectedOrderItem) {
+          batch.insert(
+            'orderProductItems',
+            {
+              "orderId": orderId,
+              "productId": orderItem.productId,
+              "productCount": orderItem.productCount ?? 0,
+            },
+          );
+          sqlHelper.backupDatabase();
+          var result = await batch.commit();
+          print(">>>>>>>>>>> selected order items ids: $result");
+        }
       }
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             backgroundColor: Colors.green,
             content: Text("Order Set Successfully")),
       );
-      Navigator.pop(context, true);
+      Navigator.pop(context, newOrder);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -314,13 +368,13 @@ class _SaleOpState extends State<SaleOp> {
 
   double? calculateProductPrice([double? discount]) {
     double total = 0;
-    discount = (discount ?? 100) / 100;
+    discount = discount ?? 0;
     double totalNet;
     for (var orderItem in selectedOrderItem) {
       total +=
           ((orderItem.productCount ?? 0) * (orderItem.productData?.price ?? 0));
     }
-    if (discount != 1) {
+    if (discount <= 1) {
       total -= (total * discount);
     }
     switch (currentCurrency) {
@@ -392,7 +446,7 @@ class _SaleOpState extends State<SaleOp> {
               insetPadding: inputPadding,
               child: Padding(
                 padding: const EdgeInsets.all(8),
-                child: (products?.isEmpty ?? false)
+                child: ((products?.isEmpty ?? false))
                     ? const Center(child: Text("No Data Found"))
                     : Column(
                         children: [
@@ -405,75 +459,84 @@ class _SaleOpState extends State<SaleOp> {
                           ),
                           const SizedBox(height: 20),
                           Expanded(
-                            child: ListView(children: [
-                              for (var product in products!)
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 8.0),
-                                  child: ListTile(
-                                    leading: Image.network(
-                                        product.image ?? "no image"),
-                                    title: Text(product.name ?? "no name"),
-                                    subtitle: getOrderItem(product.id!) == null
-                                        ? null
-                                        : Row(
-                                            children: [
-                                              IconButton(
-                                                  onPressed: getOrderItem(
-                                                                  product
-                                                                      .id!) !=
-                                                              null &&
-                                                          getOrderItem(product
-                                                                      .id!)
-                                                                  ?.productCount ==
-                                                              1
-                                                      ? null
-                                                      : () {
-                                                          getOrderItem(product
-                                                                      .id!)
-                                                                  ?.productCount =
-                                                              (getOrderItem(product
+                            child: ListView(
+                              children: widget.order != null
+                                  ? []
+                                  : [
+                                      for (var product in products!)
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 8.0),
+                                          child: ListTile(
+                                            leading: Image.network(
+                                                product.image ?? "no image"),
+                                            title:
+                                                Text(product.name ?? "no name"),
+                                            subtitle:
+                                                getOrderItem(product.id!) ==
+                                                        null
+                                                    ? null
+                                                    : Row(
+                                                        children: [
+                                                          IconButton(
+                                                              onPressed: getOrderItem(product
+                                                                              .id!) !=
+                                                                          null &&
+                                                                      getOrderItem(product.id!)
+                                                                              ?.productCount ==
+                                                                          1
+                                                                  ? null
+                                                                  : () {
+                                                                      getOrderItem(product
                                                                               .id!)
-                                                                          ?.productCount ??
-                                                                      0) -
-                                                                  1;
-                                                          setStateDialog(() {});
-                                                        },
-                                                  icon:
-                                                      const Icon(Icons.remove)),
-                                              Text(getOrderItem(product.id!)!
-                                                  .productCount
-                                                  .toString()),
-                                              IconButton(
-                                                  onPressed: () {
-                                                    getOrderItem(product.id!)
-                                                            ?.productCount =
-                                                        (getOrderItem(product
-                                                                        .id!)
-                                                                    ?.productCount ??
-                                                                0) +
-                                                            1;
-                                                    setStateDialog(() {});
-                                                  },
-                                                  icon: const Icon(Icons.add)),
-                                            ],
+                                                                          ?.productCount = (getOrderItem(product.id!)?.productCount ??
+                                                                              0) -
+                                                                          1;
+                                                                      setStateDialog(
+                                                                          () {});
+                                                                    },
+                                                              icon: const Icon(
+                                                                  Icons
+                                                                      .remove)),
+                                                          Text(getOrderItem(
+                                                                  product.id!)!
+                                                              .productCount
+                                                              .toString()),
+                                                          IconButton(
+                                                              onPressed: () {
+                                                                getOrderItem(product
+                                                                            .id!)
+                                                                        ?.productCount =
+                                                                    (getOrderItem(product.id!)?.productCount ??
+                                                                            0) +
+                                                                        1;
+                                                                setStateDialog(
+                                                                    () {});
+                                                              },
+                                                              icon: const Icon(
+                                                                  Icons.add)),
+                                                        ],
+                                                      ),
+                                            trailing: getOrderItem(
+                                                        product.id!) ==
+                                                    null
+                                                ? IconButton(
+                                                    onPressed: () {
+                                                      onAddItem(product);
+                                                      setStateDialog(() {});
+                                                    },
+                                                    icon: const Icon(Icons.add))
+                                                : IconButton(
+                                                    onPressed: () {
+                                                      onDeleteItem(product.id!);
+                                                      setStateDialog(() {});
+                                                    },
+                                                    icon: const Icon(
+                                                        Icons.delete)),
                                           ),
-                                    trailing: getOrderItem(product.id!) == null
-                                        ? IconButton(
-                                            onPressed: () {
-                                              onAddItem(product);
-                                              setStateDialog(() {});
-                                            },
-                                            icon: const Icon(Icons.add))
-                                        : IconButton(
-                                            onPressed: () {
-                                              onDeleteItem(product.id!);
-                                              setStateDialog(() {});
-                                            },
-                                            icon: const Icon(Icons.delete)),
-                                  ),
-                                ),
-                            ]),
+                                        ),
+                                    ],
+                            ),
                           ),
                           const SizedBox(height: 20),
                           AppButton(
@@ -492,6 +555,11 @@ class _SaleOpState extends State<SaleOp> {
 
   OrderItem? getOrderItem(int productId) {
     for (var item in selectedOrderItem) {
+      //todo: when the user tap on a receipt it shows the selected products
+      // if (widget.order != null) {
+      //   selectedOrderItem = widget.order;
+      //   return item;
+      // }
       if (item.productId == productId) {
         return item;
       }

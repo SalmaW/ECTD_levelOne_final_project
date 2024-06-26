@@ -5,7 +5,6 @@ class AppTextFormField extends StatelessWidget {
   final TextEditingController controller;
   final String? Function(String?)? validator;
   final String? labelText;
-  static TextEditingController? clipboardText;
   final TextInputType? textInputType;
   final TextInputAction? textInputAction;
   final List<TextInputFormatter>? inputFormatters;
@@ -51,18 +50,4 @@ class AppTextFormField extends StatelessWidget {
       ),
     );
   }
-
-  Future<void> readFromClipboard() async {
-    ClipboardData? data = await Clipboard.getData(Clipboard.kTextPlain);
-    if (data != null) {
-      clipboardText!.text = data.text!;
-      print('Text from clipboard: $clipboardText');
-    } else {
-      print('Clipboard is empty.');
-    }
-  }
-  // Future<void> writeToClipboard(String text) async {
-  //   await Clipboard.setData(ClipboardData(text: text));
-  //   print('Text "$text" copied to clipboard.');
-  // }
 }

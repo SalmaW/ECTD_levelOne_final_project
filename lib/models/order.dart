@@ -28,4 +28,14 @@ class Order {
       "clientId": clientId
     };
   }
+
+  Order(
+      {this.id,
+      this.label,
+      this.totalPrice,
+      this.discount,
+      this.clientId,
+      this.clientName,
+      this.clientPhone,
+      this.clientAddress});
 }

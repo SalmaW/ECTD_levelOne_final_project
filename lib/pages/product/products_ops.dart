@@ -1,4 +1,4 @@
-import 'package:final_project/utils/constants.dart';
+import '../../utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
@@ -23,6 +23,8 @@ class _ProductsOpsState extends State<ProductsOps> {
   TextEditingController? priceController;
   TextEditingController? stockController;
   TextEditingController? imageController;
+  String noImageController =
+      "https://static-00.iconduck.com/assets.00/no-image-icon-512x512-lfoanl0w.png";
   bool isAvailable = false;
   int? selectedCategoryId;
 
@@ -127,8 +129,7 @@ class _ProductsOpsState extends State<ProductsOps> {
                 ),
                 const SizedBox(height: 20),
                 AppTextFormField(
-                  controller:
-                      imageController ?? AppTextFormField.clipboardText!,
+                  controller: imageController!,
                   textInputAction: TextInputAction.next,
                   labelText: "Image",
                 ),
@@ -188,7 +189,9 @@ class _ProductsOpsState extends State<ProductsOps> {
                 'description': descriptionController?.text,
                 'price': priceController?.text,
                 'stock': stockController?.text,
-                'image': imageController?.text,
+                'image': imageController!.text.isEmpty
+                    ? noImageController
+                    : imageController?.text,
                 'isAvailable': isAvailable,
                 'categoryId': selectedCategoryId,
               },
@@ -202,7 +205,9 @@ class _ProductsOpsState extends State<ProductsOps> {
             'description': descriptionController?.text,
             'price': priceController?.text,
             'stock': stockController?.text,
-            'image': imageController?.text,
+            'image': imageController!.text.isEmpty
+                ? noImageController
+                : imageController?.text,
             'isAvailable': isAvailable,
             'categoryId': selectedCategoryId,
           });
