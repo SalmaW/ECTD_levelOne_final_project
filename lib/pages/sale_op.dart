@@ -50,7 +50,38 @@ class _SaleOpState extends State<SaleOp> {
     selectedCurrencyText = currencyToString(selectedCurrency);
     discountController = TextEditingController(
         text: widget.order == null ? "" : "${widget.order!.discount! * 100}");
-    getProducts();
+    // Initialize selectedOrderItem based on existing order or empty list
+    if (widget.order != null) {
+      // If updating existing order, fetch associated OrderItems from database or storage
+      getOrderItems(widget
+          .order!.id!); // Assuming orderId can be fetched from widget.order
+    } else {
+      // If creating a new order, fetch products
+      getProducts();
+    }
+    setState(() {});
+  }
+
+  void getOrderItems(int orderId) async {
+    try {
+      var sqlHelper = GetIt.I.get<SqlHelper>();
+      var data = await sqlHelper.db!.rawQuery("""
+      select OI.*  
+      from orderProductItems OI
+      inner join Products P
+      where OI.productId = P.id
+      """);
+
+      if (data.isNotEmpty) {
+        selectedOrderItem =
+            data.map((item) => OrderItem.fromJson(item)).toList();
+      } else {
+        selectedOrderItem = [];
+      }
+    } catch (e) {
+      print('Error fetching order items: $e');
+      selectedOrderItem = [];
+    }
     setState(() {});
   }
 
