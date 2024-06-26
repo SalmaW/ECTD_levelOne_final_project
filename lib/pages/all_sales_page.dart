@@ -75,7 +75,8 @@ class _AllSalesState extends State<AllSales> {
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
                                   GestureDetector(
-                                    onTapUp: (orders) async {
+                                    //update receipt
+                                    onTapUp: (orderClick) async {
                                       var result = await Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -86,7 +87,8 @@ class _AllSalesState extends State<AllSales> {
                                         getOrders();
                                       }
                                     },
-                                    onLongPressEnd: (orders) {
+                                    //delete receipt
+                                    onLongPressEnd: (orderClick) {
                                       onDeleteRow(order.id!);
                                     },
                                     child: Card(
