@@ -1,8 +1,9 @@
+import 'package:final_project/pages/currency_selection_new.dart';
+
 import '../models/order.dart';
 import '../pages/client/clients.dart';
 import '../pages/product/products.dart';
 import '../pages/all_sales_page.dart';
-// import '../pages/all_sales.dart';
 import '../pages/sale_op.dart';
 import '../pages/category/categories.dart';
 import '../helpers/sql_helper.dart';
@@ -23,9 +24,11 @@ class _HomePageState extends State<HomePage> {
   bool isTableInitialized = false;
   bool isDBRestored = false;
   List<Order>? orders;
+  String selectedCurrencyTo = 'EGP'; // Default selectedCurrencyTo
 
   @override
   void initState() {
+    getOrders();
     super.initState();
     // Defer the initialization to the next frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -81,7 +84,9 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: Container(),
+      drawer: Drawer(
+        child: ExchangeRateDropdowns(onCurrencyChanged: selectedCurrencyTo),
+      ),
       appBar: AppBar(),
       body: Column(
         children: [
@@ -101,7 +106,7 @@ class _HomePageState extends State<HomePage> {
                         Row(
                           children: [
                             const Text(
-                              'Easy Pos',
+                              'Market Manager',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w800,
@@ -128,7 +133,7 @@ class _HomePageState extends State<HomePage> {
                           ],
                         ),
                         const SizedBox(height: 10),
-                        headerItem('Exchange rate', '1USD = 50 EGP'),
+                        headerItem('Exchange rate', ExchangeRateDropdowns.line),
                         headerItem(
                             'Today\'s sales', calcTodaySales().toString()),
                       ],
@@ -253,7 +258,7 @@ class _HomePageState extends State<HomePage> {
 
   double calcTodaySales() {
     double total = 0;
-    for (var order in orders ?? []) {
+    for (var order in (orders ?? [])) {
       if (order.totalPrice != null) {
         total += order.totalPrice!;
       }

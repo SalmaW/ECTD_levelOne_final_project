@@ -313,16 +313,17 @@ class _AllSalesState extends State<AllSales> {
           where: "id = ?",
           whereArgs: [id],
         );
+        await sqlHelper.db!.delete(
+          'orderProductItems',
+          where: 'orderId = ?',
+          whereArgs: [id],
+        );
         sqlHelper.backupDatabase();
-        // if (result > 0) {
-        //   getOrders();
-        //   setState(() {});
-        // }
         if (result > 0) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Order deleted successfully")),
           );
-          getOrders(); // Refresh the list after deletion
+          getOrders();
         }
         print(">>>>>>>>>>> selected order & orderItem are deleted : $result");
       }

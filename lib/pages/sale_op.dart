@@ -43,14 +43,16 @@ class _SaleOpState extends State<SaleOp> {
   void initPage() {
     orderLabel = widget.order == null
         ? "#ORDER${DateTime.now().microsecondsSinceEpoch}"
-        : "${widget.order!.id}";
+        : "${widget.order!.label}";
     selectedClientId = widget.order?.clientId;
     currencyText = currencyToString(currentCurrency);
     selectedCurrencyText = currencyToString(selectedCurrency);
     discountController = TextEditingController(
         text: widget.order == null ? "" : "${widget.order!.discount! * 100}");
+
     if (widget.order != null) {
       loadOrderItems(widget.order!.id!);
+      getProducts();
     } else {
       getProducts();
     }
@@ -112,7 +114,6 @@ class _SaleOpState extends State<SaleOp> {
           }
         }
       }
-      getProducts();
       setState(() {});
     } catch (e) {
       print('Error loading order items: $e');
@@ -284,7 +285,7 @@ class _SaleOpState extends State<SaleOp> {
                                 ),
                               ),
                               Text(
-                                "${calculateProductPrice(widget.order == null ? discount : widget.order!.discount ?? discount)} $currencyText ",
+                                "${calculateProductPrice(widget.order == null ? discount : widget.order!.discount)} $currencyText ",
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w700,
                                   fontSize: 16,
@@ -316,7 +317,6 @@ class _SaleOpState extends State<SaleOp> {
 
   Future<void> onSetOrder() async {
     try {
-      Order newOrder;
       if (widget.order != null) {
         //update
         var sqlHelper = GetIt.I.get<SqlHelper>();
@@ -330,13 +330,6 @@ class _SaleOpState extends State<SaleOp> {
           },
           where: 'id = ?',
           whereArgs: [widget.order?.id],
-        );
-        newOrder = Order(
-          id: orderId,
-          label: orderLabel,
-          totalPrice: calculateProductPrice(),
-          discount: discount,
-          clientId: selectedClientId,
         );
 
         var batch = sqlHelper.db!.batch();
@@ -367,13 +360,6 @@ class _SaleOpState extends State<SaleOp> {
             "clientId": selectedClientId
           },
         );
-        newOrder = Order(
-          id: orderId,
-          label: orderLabel,
-          totalPrice: calculateProductPrice(),
-          discount: discount,
-          clientId: selectedClientId,
-        );
 
         var batch = sqlHelper.db!.batch();
         for (var orderItem in selectedOrderItem) {
@@ -395,7 +381,7 @@ class _SaleOpState extends State<SaleOp> {
             backgroundColor: Colors.green,
             content: Text("Order Set Successfully")),
       );
-      Navigator.pop(context, newOrder);
+      Navigator.pop(context, true);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -410,12 +396,6 @@ class _SaleOpState extends State<SaleOp> {
     double total = 0;
     discount = discount ?? 0;
     double totalNet;
-
-    // if (widget.order != null) {
-    //   var totalNet = widget.order!.totalPrice! -
-    //       (widget.order!.totalPrice! * widget.order!.discount!);
-    //   return totalNet;
-    // }
 
     for (var orderItem in selectedOrderItem) {
       total +=
@@ -436,9 +416,9 @@ class _SaleOpState extends State<SaleOp> {
   convertPrice(var price, String fromCurrency, String toCurrency) {
     final Map<String, double> exchangeRates = {
       'EGPtoUSD': 0.021,
+      'EURtoUSD': 1.07,
       'EGPtoEUR': 0.02,
       'USDtoEUR': 0.93,
-      'EURtoUSD': 1.07,
       'USDtoEGP': 47.66,
       'EURtoEGP': 51.13,
     };
@@ -598,7 +578,6 @@ class _SaleOpState extends State<SaleOp> {
 
   OrderItem? getOrderItem(int productId) {
     for (var item in selectedOrderItem) {
-      //todo: when the user tap on a receipt it shows the selected products
       if (item.productId == productId) {
         return item;
       }

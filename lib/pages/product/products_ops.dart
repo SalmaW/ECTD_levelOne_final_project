@@ -200,17 +200,20 @@ class _ProductsOpsState extends State<ProductsOps> {
           sqlHelper.backupDatabase();
         } else {
           var sqlHelper = GetIt.I.get<SqlHelper>();
-          await sqlHelper.db!.insert("Products", {
-            'name': nameController?.text,
-            'description': descriptionController?.text,
-            'price': priceController?.text,
-            'stock': stockController?.text,
-            'image': imageController!.text.isEmpty
-                ? noImageController
-                : imageController?.text,
-            'isAvailable': isAvailable,
-            'categoryId': selectedCategoryId,
-          });
+          await sqlHelper.db!.insert(
+            "Products",
+            {
+              'name': nameController?.text,
+              'description': descriptionController?.text,
+              'price': priceController?.text,
+              'stock': stockController?.text,
+              'image': imageController!.text.isEmpty
+                  ? noImageController
+                  : imageController?.text,
+              'isAvailable': isAvailable,
+              'categoryId': selectedCategoryId,
+            },
+          );
           sqlHelper.backupDatabase();
         }
         ScaffoldMessenger.of(context).showSnackBar(

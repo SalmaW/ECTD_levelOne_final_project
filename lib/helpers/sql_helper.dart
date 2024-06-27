@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -99,7 +100,17 @@ class SqlHelper {
           ) 
           """);
 
+      batch.execute("""
+        CREATE TABLE if not exists exchangeRates (
+          id INTEGER PRIMARY KEY,
+          currency_from TEXT NOT NULL,
+          currency_to TEXT NOT NULL,
+          rate real NOT NULL
+          )
+          """);
+
       var result = await batch.commit();
+      await insertInitialExchangeRates();
       print('results $result');
       return true;
     } catch (e) {
@@ -257,20 +268,44 @@ class SqlHelper {
   }
 
   //Currency
-  Future<void> setSelectedCurrency(String currency) async {
-    await db!.insert(
-      'currency',
-      {'id': 1, 'selectedCurrency': currency},
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+  Future<void> insertInitialExchangeRates() async {
+    try {
+      var batch = db!.batch();
+
+      batch.execute("""
+         INSERT INTO exchangeRates (currency_from, currency_to, rate)
+         VALUES 
+           ('USD', 'EGP', 47.66),
+           ('EUR', 'EGP', 51.13),
+           ('EGP', 'USD', ${1 / 47.66}),
+           ('USD', 'EUR', 0.85),
+           ('EUR', 'USD', 1.18),
+           ('EGP', 'EUR', ${1 / 51.13})
+       """);
+
+      await batch.commit();
+      print('Initial exchange rates inserted successfully');
+    } catch (e) {
+      print('Error inserting initial exchange rates: $e');
+    }
   }
 
-  Future<String> getSelectedCurrency() async {
-    final List<Map<String, dynamic>> maps = await db!.query('currency');
-    if (maps.isNotEmpty) {
-      return maps.first['selectedCurrency'];
-    } else {
-      return 'USD'; // default currency
+  Future<double> getExchangeRate(String from, String to) async {
+    try {
+      final List<Map<String, dynamic>> result = await db!.query(
+        'exchangeRates',
+        where: 'currency_from = ? AND currency_to = ?',
+        whereArgs: [from, to],
+      );
+
+      if (result.isNotEmpty) {
+        return result.first['rate'] as double;
+      } else {
+        throw Exception('Exchange rate not found');
+      }
+    } catch (e) {
+      print('Error fetching exchange rate: $e');
+      return 0.0; // Handle error case
     }
   }
 }
