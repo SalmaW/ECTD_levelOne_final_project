@@ -222,24 +222,6 @@ class SqlHelper {
         false; // Default to false if dialog is dismissed
   }
 
-  // Future<void> deleteOldDatabase() async {
-  //   try {
-  //     // Get the path to the old database file
-  //     var databasesPath = await getDatabasesPath();
-  //     var oldDatabasePath = join(databasesPath, 'pos.db');
-  //
-  //     var oldDatabaseFile = File(oldDatabasePath);
-  //     if (await oldDatabaseFile.exists()) {
-  //       await oldDatabaseFile.delete();
-  //       print('Old database deleted');
-  //     } else {
-  //       print('Old database not found');
-  //     }
-  //   } catch (e) {
-  //     print('Error deleting old database: $e');
-  //   }
-  // }
-
   Future<void> clearDatabase() async {
     try {
       await db!.transaction((txn) async {

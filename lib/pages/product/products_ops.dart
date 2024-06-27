@@ -1,7 +1,7 @@
-import '../../utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
+import '../../utils/constants.dart';
 import '../../helpers/sql_helper.dart';
 import '../../models/product_data.dart';
 import '../../widgets/categories_drop_down.dart';

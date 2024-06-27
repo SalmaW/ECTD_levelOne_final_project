@@ -1,11 +1,11 @@
 import 'package:data_table_2/data_table_2.dart';
-import 'package:final_project/utils/constants.dart';
-import 'package:final_project/widgets/search_textField.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import '../../utils/constants.dart';
+import '../../widgets/search_textField.dart';
+import '../../widgets/app_table.dart';
 import '../../models/client_data.dart';
 import '../../pages/client/client_ops.dart';
-import '../../widgets/app_table.dart';
 import '../../helpers/sql_helper.dart';
 
 class ClientsScreen extends StatefulWidget {
@@ -20,7 +20,6 @@ class _ClientsScreenState extends State<ClientsScreen> {
 
   @override
   void initState() {
-    // SqlHelper.getAllClients();
     getClients();
     super.initState();
   }
@@ -33,7 +32,6 @@ class _ClientsScreenState extends State<ClientsScreen> {
       if (data.isNotEmpty) {
         clients = [];
         for (var item in data) {
-          // categories ??= [];
           clients!.add(ClientData.fromJson(item));
         }
       } else {
@@ -57,7 +55,6 @@ class _ClientsScreenState extends State<ClientsScreen> {
               var result = await Navigator.push(context,
                   MaterialPageRoute(builder: (ctx) => const ClientsOps()));
               if (result ?? false) {
-                // SqlHelper.getAllClients();
                 getClients();
               }
             },

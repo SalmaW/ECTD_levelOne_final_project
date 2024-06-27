@@ -1,8 +1,8 @@
+import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import '../../helpers/sql_helper.dart';
 import '../../models/category_data.dart';
 import '../../widgets/text_form_field.dart';
-import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
 import '../../widgets/app_button.dart';
 
 class CategoriesOps extends StatefulWidget {

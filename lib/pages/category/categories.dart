@@ -1,12 +1,12 @@
 import 'package:data_table_2/data_table_2.dart';
-import 'package:final_project/utils/constants.dart';
-import 'package:final_project/widgets/search_textField.dart';
-import '../../widgets/app_table.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import '../../utils/constants.dart';
+import '../../widgets/search_textField.dart';
+import '../../widgets/app_table.dart';
 import '../../helpers/sql_helper.dart';
-import '../category/categories_ops.dart';
 import '../../models/category_data.dart';
+import '../category/categories_ops.dart';
 
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
@@ -28,12 +28,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   void getCategories() async {
     try {
       var sqlHelper = GetIt.I.get<SqlHelper>();
-      var data =
-          await sqlHelper.db!.query("Categories"); //select all from categories
+      var data = await sqlHelper.db!.query("Categories");
       if (data.isNotEmpty) {
         categories = [];
         for (var item in data) {
-          // categories ??= [];
           categories!.add(ClientData.fromJson(item));
         }
       } else {
@@ -209,8 +207,6 @@ class CategoriesTableSource extends DataTableSource {
   @override
   DataRow? getRow(int index) {
     return DataRow2(
-      // onSelectChanged: (value) {},
-      // selected: true,
       cells: [
         DataCell(Text("${categories?[index].id}")),
         DataCell(Text("${categories?[index].name}")),
@@ -220,15 +216,12 @@ class CategoriesTableSource extends DataTableSource {
           children: [
             IconButton(
               onPressed: () async {
-                // Navigator.push(context,
-                //     MaterialPageRoute(builder: (ctx) => CategoriesOps()));
                 onUpdate.call(categories![index]);
               },
               icon: const Icon(Icons.edit),
             ),
             IconButton(
               onPressed: () async {
-                // await onDeleteRow(categories?[index].id ?? 0);
                 onDelete.call(categories![index]);
               },
               icon: const Icon(Icons.delete),

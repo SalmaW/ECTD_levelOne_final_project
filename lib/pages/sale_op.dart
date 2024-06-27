@@ -1,14 +1,13 @@
+import 'package:get_it/get_it.dart';
+import 'package:flutter/material.dart';
+import '../helpers/sql_helper.dart';
 import '../utils/constants.dart';
 import '../widgets/clients_drop_down.dart';
 import '../widgets/dash_line.dart';
 import '../widgets/discount_textField.dart';
-
+import '../widgets/app_button.dart';
 import '../models/order.dart';
 import '../models/order_item.dart';
-import '../widgets/app_button.dart';
-import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
-import '../helpers/sql_helper.dart';
 import '../models/product_data.dart';
 import 'currency_selection.dart';
 
@@ -100,14 +99,16 @@ class _SaleOpState extends State<SaleOp> {
             whereArgs: [item['productId']],
           );
           if (productData.isNotEmpty) {
-            selectedOrderItem.add(
-              OrderItem(
-                orderId: item['orderId'] as int,
-                productId: item['productId'] as int,
-                productCount: item['productCount'] as int,
-                productData: ProductData.fromJson(productData[0]),
-              ),
-            );
+            for (var product in productData) {
+              selectedOrderItem.add(
+                OrderItem(
+                  orderId: item['orderId'] as int,
+                  productId: item['productId'] as int,
+                  productCount: item['productCount'] as int,
+                  productData: ProductData.fromJson(product),
+                ),
+              );
+            }
           }
         }
       }

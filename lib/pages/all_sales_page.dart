@@ -1,8 +1,7 @@
-import 'package:data_table_2/data_table_2.dart';
-import 'package:final_project/pages/sale_op.dart';
-import 'package:final_project/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import '../../pages/sale_op.dart';
+import '../../utils/constants.dart';
 import '../helpers/sql_helper.dart';
 import '../models/order.dart';
 import '../models/order_item.dart';
