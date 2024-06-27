@@ -50,37 +50,10 @@ class _SaleOpState extends State<SaleOp> {
     selectedCurrencyText = currencyToString(selectedCurrency);
     discountController = TextEditingController(
         text: widget.order == null ? "" : "${widget.order!.discount! * 100}");
-    // Initialize selectedOrderItem based on existing order or empty list
     if (widget.order != null) {
-      // If updating existing order, fetch associated OrderItems from database or storage
-      getOrderItems(widget
-          .order!.id!); // Assuming orderId can be fetched from widget.order
+      loadOrderItems(widget.order!.id!);
     } else {
-      // If creating a new order, fetch products
       getProducts();
-    }
-    setState(() {});
-  }
-
-  void getOrderItems(int orderId) async {
-    try {
-      var sqlHelper = GetIt.I.get<SqlHelper>();
-      var data = await sqlHelper.db!.rawQuery("""
-      select OI.*  
-      from orderProductItems OI
-      inner join Products P
-      where OI.productId = P.id
-      """);
-
-      if (data.isNotEmpty) {
-        selectedOrderItem =
-            data.map((item) => OrderItem.fromJson(item)).toList();
-      } else {
-        selectedOrderItem = [];
-      }
-    } catch (e) {
-      print('Error fetching order items: $e');
-      selectedOrderItem = [];
     }
     setState(() {});
   }
@@ -108,6 +81,42 @@ class _SaleOpState extends State<SaleOp> {
       products = [];
     }
     setState(() {});
+  }
+
+  void loadOrderItems(int orderId) async {
+    // Implement code to load order items based on orderId
+    try {
+      var sqlHelper = GetIt.I.get<SqlHelper>();
+      var data = await sqlHelper.db!.rawQuery("""
+        SELECT * FROM orderProductItems WHERE orderId = ?
+      """, [orderId]);
+
+      if (data.isNotEmpty) {
+        selectedOrderItem = []; // Clear the list before populating
+        for (var item in data) {
+          var productData = await sqlHelper.db!.query(
+            'Products',
+            where: 'id = ?',
+            whereArgs: [item['productId']],
+          );
+          if (productData.isNotEmpty) {
+            selectedOrderItem.add(
+              OrderItem(
+                orderId: item['orderId'] as int,
+                productId: item['productId'] as int,
+                productCount: item['productCount'] as int,
+                productData: ProductData.fromJson(productData[0]),
+              ),
+            );
+          }
+        }
+      }
+      getProducts();
+      setState(() {});
+    } catch (e) {
+      print('Error loading order items: $e');
+      // Handle error loading order items
+    }
   }
 
   @override
@@ -274,7 +283,7 @@ class _SaleOpState extends State<SaleOp> {
                                 ),
                               ),
                               Text(
-                                "${calculateProductPrice(discount)} $currencyText ",
+                                "${calculateProductPrice(widget.order == null ? discount : widget.order!.discount ?? discount)} $currencyText ",
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w700,
                                   fontSize: 16,
@@ -338,8 +347,9 @@ class _SaleOpState extends State<SaleOp> {
               "productId": orderItem.productId,
               "productCount": orderItem.productCount ?? 0,
             },
-            where: 'id = ?',
-            whereArgs: [orderId],
+            where:
+                'orderId = ? AND productId = ?', // Adjust according to your schema
+            whereArgs: [orderId, orderItem.productId],
           );
           sqlHelper.backupDatabase();
           var result = await batch.commit();
@@ -399,6 +409,13 @@ class _SaleOpState extends State<SaleOp> {
     double total = 0;
     discount = discount ?? 0;
     double totalNet;
+
+    // if (widget.order != null) {
+    //   var totalNet = widget.order!.totalPrice! -
+    //       (widget.order!.totalPrice! * widget.order!.discount!);
+    //   return totalNet;
+    // }
+
     for (var orderItem in selectedOrderItem) {
       total +=
           ((orderItem.productCount ?? 0) * (orderItem.productData?.price ?? 0));
@@ -581,10 +598,6 @@ class _SaleOpState extends State<SaleOp> {
   OrderItem? getOrderItem(int productId) {
     for (var item in selectedOrderItem) {
       //todo: when the user tap on a receipt it shows the selected products
-      // if (widget.order != null) {
-      //   selectedOrderItem = widget.order;
-      //   return item;
-      // }
       if (item.productId == productId) {
         return item;
       }

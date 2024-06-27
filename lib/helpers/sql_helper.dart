@@ -9,6 +9,7 @@ import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
 class SqlHelper {
   Database? db;
+  bool isDBInitialized = false;
   final String dbName = 'pos.db';
 
   // Initialize database
@@ -26,6 +27,7 @@ class SqlHelper {
           },
         );
       }
+      isDBInitialized = true;
     } catch (e) {
       print('Error in creating db: $e');
     }
@@ -201,9 +203,7 @@ class SqlHelper {
                   child: const Text('Cancel'),
                   onPressed: () async {
                     Navigator.of(context).pop(false);
-                    if (getBackupDatabasePath()
-                        .toString()
-                        .contains("pos_backup.db")) {
+                    if (isDBInitialized) {
                       await clearDatabase();
                     }
                     await createTables();
@@ -222,23 +222,23 @@ class SqlHelper {
         false; // Default to false if dialog is dismissed
   }
 
-  Future<void> deleteOldDatabase() async {
-    try {
-      // Get the path to the old database file
-      var databasesPath = await getDatabasesPath();
-      var oldDatabasePath = join(databasesPath, 'pos.db');
-
-      var oldDatabaseFile = File(oldDatabasePath);
-      if (await oldDatabaseFile.exists()) {
-        await oldDatabaseFile.delete();
-        print('Old database deleted');
-      } else {
-        print('Old database not found');
-      }
-    } catch (e) {
-      print('Error deleting old database: $e');
-    }
-  }
+  // Future<void> deleteOldDatabase() async {
+  //   try {
+  //     // Get the path to the old database file
+  //     var databasesPath = await getDatabasesPath();
+  //     var oldDatabasePath = join(databasesPath, 'pos.db');
+  //
+  //     var oldDatabaseFile = File(oldDatabasePath);
+  //     if (await oldDatabaseFile.exists()) {
+  //       await oldDatabaseFile.delete();
+  //       print('Old database deleted');
+  //     } else {
+  //       print('Old database not found');
+  //     }
+  //   } catch (e) {
+  //     print('Error deleting old database: $e');
+  //   }
+  // }
 
   Future<void> clearDatabase() async {
     try {
@@ -265,6 +265,7 @@ class SqlHelper {
         return true;
       } else {
         print('Failed to restore database');
+        await createTables();
         return false;
       }
     } else {

@@ -224,7 +224,8 @@ class _ProductsOpsState extends State<ProductsOps> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             backgroundColor: Colors.red,
-            content: Text("Please Make Sure to Select a Category")),
+            content: Text(
+                "Please Make Sure to Select a Category or You Are Connected to the WIFI")),
       );
       print("Error in Creating Product: $e");
     }

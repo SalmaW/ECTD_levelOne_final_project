@@ -6,6 +6,7 @@ import 'package:get_it/get_it.dart';
 import '../helpers/sql_helper.dart';
 import '../models/order.dart';
 import '../models/order_item.dart';
+import '../models/product_data.dart';
 import '../widgets/dash_line.dart';
 import 'currency_selection.dart';
 
@@ -18,6 +19,7 @@ class AllSales extends StatefulWidget {
 
 class _AllSalesState extends State<AllSales> {
   List<Order>? orders;
+  List<ProductData>? products;
   late String currencyText;
   Currency currentCurrency = Currency.USD; // Default currency is USD in App
   Currency selectedCurrency = Currency.EGP;
