@@ -7,6 +7,7 @@ class Order {
   String? clientName;
   String? clientPhone;
   String? clientAddress;
+  String? productNames;
 
   Order.fromJson(Map<String, dynamic> data) {
     id = data["id"];
@@ -17,6 +18,7 @@ class Order {
     clientName = data["clientName"];
     clientPhone = data["clientPhone"];
     clientAddress = data["clientAddress"];
+    productNames = data["productNames"];
   }
 
   Map<String, dynamic> toJson() {
@@ -25,17 +27,23 @@ class Order {
       "label": label,
       "totalPrice": totalPrice,
       "discount": discount,
-      "clientId": clientId
+      "clientId": clientId,
+      "clientName": clientName,
+      "clientPhone": clientPhone,
+      "clientAddress": clientAddress,
+      "productNames": productNames,
     };
   }
 
-  Order(
-      {this.id,
-      this.label,
-      this.totalPrice,
-      this.discount,
-      this.clientId,
-      this.clientName,
-      this.clientPhone,
-      this.clientAddress});
+  Order({
+    this.id,
+    this.label,
+    this.totalPrice,
+    this.discount,
+    this.clientId,
+    this.clientName,
+    this.clientPhone,
+    this.clientAddress,
+    this.productNames,
+  });
 }

@@ -36,15 +36,24 @@ class _AllSalesState extends State<AllSales> {
     try {
       var sqlHelper = GetIt.I.get<SqlHelper>();
       var data = await sqlHelper.db!.rawQuery("""
-      select O.* ,C.name as clientName,C.phone as clientPhone,C.address as clientAddress
-      from Orders O
-      inner join Clients C
-      where O.clientId = C.id
-      """);
+    SELECT O.*, 
+           C.name as clientName, 
+           C.phone as clientPhone, 
+           C.address as clientAddress,
+           GROUP_CONCAT(P.name, ', ') as productNames
+    FROM Orders O
+    INNER JOIN Clients C ON O.clientId = C.id
+    LEFT JOIN orderProductItems OI ON O.id = OI.orderId
+    LEFT JOIN Products P ON OI.productId = P.id
+    GROUP BY O.id
+    """);
+
+      print('Raw query result: $data');
 
       if (data.isNotEmpty) {
         orders = [];
         for (var item in data) {
+          print('Parsing Order from JSON: $item');
           orders!.add(Order.fromJson(item));
         }
       } else {
@@ -54,6 +63,7 @@ class _AllSalesState extends State<AllSales> {
       print('Error In get data from orders $e');
       orders = [];
     }
+    print('Orders list: $orders');
     setState(() {});
   }
 
@@ -107,7 +117,6 @@ class _AllSalesState extends State<AllSales> {
                                                     MainAxisAlignment
                                                         .spaceBetween,
                                                 children: [
-                                                  //TODO: replace with date of purchase
                                                   Text(
                                                     currencyConvertorLine(
                                                         currentCurrency),
@@ -160,13 +169,36 @@ class _AllSalesState extends State<AllSales> {
                                             const SizedBox(height: 20),
                                             const DashedSeparator(),
                                             const SizedBox(height: 20),
-                                            const Column(
+                                            // Column(
+                                            //   crossAxisAlignment:
+                                            //       CrossAxisAlignment.stretch,
+                                            //   children: [
+                                            //     Text("Product names:"),
+                                            //     // Display each product name on a new line
+                                            //     ...order.productNames
+                                            //             ?.split(', ')
+                                            //             .map((productName) =>
+                                            //                 Text(productName))
+                                            //             .toList() ??
+                                            //         [],
+                                            //   ],
+                                            // ),
+                                            Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.stretch,
                                               children: [
-                                                Text("product name"),
-                                                //todo: remove the static text
-                                                Text("2 x 20.0 USD"),
+                                                Text("Product details:"),
+                                                // Handle empty or null productNames
+                                                if (order.productNames !=
+                                                        null &&
+                                                    order.productNames!
+                                                        .isNotEmpty)
+                                                  ...(order.productNames!
+                                                      .split(', ')
+                                                      .map((productName) {
+                                                    return Text(
+                                                        productName.trim());
+                                                  }).toList()),
                                               ],
                                             ),
                                             Row(

@@ -85,35 +85,41 @@ class _SaleOpState extends State<SaleOp> {
   }
 
   void loadOrderItems(int orderId) async {
-    // Implement code to load order items based on orderId
     try {
       var sqlHelper = GetIt.I.get<SqlHelper>();
-      var data = await sqlHelper.db!.rawQuery("""
-        SELECT * FROM orderProductItems WHERE orderId = ?
-      """, [orderId]);
+      var data = await sqlHelper.db!.rawQuery('''
+      SELECT * FROM orderProductItems WHERE orderId = ?
+    ''', [orderId]);
 
       if (data.isNotEmpty) {
-        selectedOrderItem = []; // Clear the list before populating
+        selectedOrderItem.clear();
+        var addedProductIds = <int>{};
+
         for (var item in data) {
           var productData = await sqlHelper.db!.query(
             'Products',
             where: 'id = ?',
             whereArgs: [item['productId']],
           );
+
           if (productData.isNotEmpty) {
-            for (var product in productData) {
-              selectedOrderItem.add(
-                OrderItem(
-                  orderId: item['orderId'] as int,
-                  productId: item['productId'] as int,
-                  productCount: item['productCount'] as int,
-                  productData: ProductData.fromJson(product),
-                ),
+            var product = productData.first;
+            var productId = item['productId'] as int;
+
+            if (!addedProductIds.contains(productId)) {
+              var orderItem = OrderItem(
+                orderId: item['orderId'] as int,
+                productId: item['productId'] as int,
+                productCount: item['productCount'] as int,
+                productData: ProductData.fromJson(product),
               );
+              selectedOrderItem.add(orderItem);
+              addedProductIds.add(productId);
             }
           }
         }
       }
+
       setState(() {});
     } catch (e) {
       print('Error loading order items: $e');
@@ -317,10 +323,11 @@ class _SaleOpState extends State<SaleOp> {
 
   Future<void> onSetOrder() async {
     try {
+      var sqlHelper = GetIt.I.get<SqlHelper>();
+      var orderId;
       if (widget.order != null) {
         //update
-        var sqlHelper = GetIt.I.get<SqlHelper>();
-        var orderId = await sqlHelper.db!.update(
+        orderId = await sqlHelper.db!.update(
           "Orders",
           {
             "label": orderLabel,
@@ -331,6 +338,9 @@ class _SaleOpState extends State<SaleOp> {
           where: 'id = ?',
           whereArgs: [widget.order?.id],
         );
+
+        // Clear selectedOrderItem and add updated items
+        selectedOrderItem.clear();
 
         var batch = sqlHelper.db!.batch();
         for (var orderItem in selectedOrderItem) {
@@ -350,8 +360,7 @@ class _SaleOpState extends State<SaleOp> {
           print(">>>>>>>>>>> Update selected order items ids: $result");
         }
       } else {
-        var sqlHelper = GetIt.I.get<SqlHelper>();
-        var orderId = await sqlHelper.db!.insert(
+        orderId = await sqlHelper.db!.insert(
           "Orders",
           {
             "label": orderLabel,

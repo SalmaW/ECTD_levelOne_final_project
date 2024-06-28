@@ -1,4 +1,4 @@
-import 'package:final_project/widgets/currency_selection_new.dart';
+import 'package:final_project/widgets/currency_selection_home.dart';
 
 import '../models/order.dart';
 import '../pages/client/clients.dart';
