@@ -91,26 +91,34 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         child: Column(
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                DropdownButton<String>(
-                  value: selectedSortCriteria,
-                  hint: const Text('Sort by'),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      selectedSortCriteria =
-                          newValue; // Update selectedSortCriteria
-                      sortCategories(); // Sort clients based on new criteria
-                    });
-                  },
-                  items: sortCriteria
-                      .map<DropdownMenuItem<String>>(
-                        (String value) => DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        ),
-                      )
-                      .toList(),
+                Card(
+                  color: gray200Color,
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+                    child: DropdownButton<String>(
+                      underline: const SizedBox(),
+                      value: selectedSortCriteria,
+                      hint: const Text('Sort by'),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedSortCriteria =
+                              newValue; // Update selectedSortCriteria
+                          sortCategories(); // Sort clients based on new criteria
+                        });
+                      },
+                      items: sortCriteria
+                          .map<DropdownMenuItem<String>>(
+                            (String value) => DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ),
                 ),
               ],
             ),

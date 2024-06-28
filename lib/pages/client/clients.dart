@@ -104,24 +104,32 @@ class _ClientsScreenState extends State<ClientsScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                DropdownButton<String>(
-                  value: selectedSortCriteria,
-                  hint: const Text('Sort by'),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      selectedSortCriteria =
-                          newValue; // Update selectedSortCriteria
-                      sortClients(); // Sort clients based on new criteria
-                    });
-                  },
-                  items: sortCriteria
-                      .map<DropdownMenuItem<String>>(
-                        (String value) => DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        ),
-                      )
-                      .toList(),
+                Card(
+                  color: gray200Color,
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+                    child: DropdownButton<String>(
+                      underline: const SizedBox(),
+                      value: selectedSortCriteria,
+                      hint: const Text('Sort by'),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedSortCriteria =
+                              newValue; // Update selectedSortCriteria
+                          sortClients(); // Sort clients based on new criteria
+                        });
+                      },
+                      items: sortCriteria
+                          .map<DropdownMenuItem<String>>(
+                            (String value) => DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ),
                 ),
                 Expanded(
                   child: Padding(
