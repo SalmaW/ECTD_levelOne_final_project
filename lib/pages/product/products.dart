@@ -1,4 +1,5 @@
 import 'package:data_table_2/data_table_2.dart';
+import 'package:final_project/widgets/filter_textField.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import '../../utils/constants.dart';
@@ -17,21 +18,31 @@ class ProductsScreen extends StatefulWidget {
 
 class _ProductsScreenState extends State<ProductsScreen> {
   List<ProductData>? products;
+  bool sortAscending = true;
+  String? selectedSortCriteria;
+  TextEditingController searchController = TextEditingController();
+
   @override
   void initState() {
     getProducts();
     super.initState();
   }
 
-  void getProducts() async {
+  void getProducts({String? filter}) async {
     try {
       var sqlHelper = GetIt.I.get<SqlHelper>();
-      var data = await sqlHelper.db!.rawQuery("""
-      select P.* ,C.name as categoryName,C.description as categoryDescription 
-      from Products P
-      inner join Categories C
-      where P.categoryId = C.id
-      """);
+      var query = """
+      SELECT P.*, C.name as categoryName, C.description as categoryDescription 
+      FROM Products P
+      INNER JOIN Categories C
+      ON P.categoryId = C.id
+      """;
+      if (filter != null && filter.isNotEmpty) {
+        query +=
+            " WHERE P.price LIKE '%$filter%' OR P.categoryId LIKE '%$filter%'";
+      }
+
+      var data = await sqlHelper.db!.rawQuery(query);
 
       if (data.isNotEmpty) {
         products = [];
@@ -45,11 +56,36 @@ class _ProductsScreenState extends State<ProductsScreen> {
       print('Error In get data $e');
       products = [];
     }
+    sortProducts();
+  }
+
+  void sortProducts() {
+    if (products != null && selectedSortCriteria != null) {
+      switch (selectedSortCriteria) {
+        case 'Name':
+          products!.sort((a, b) => sortAscending
+              ? a.name!.compareTo(b.name!)
+              : b.name!.compareTo(a.name!));
+          break;
+        case 'Category Name':
+          products!.sort((a, b) => sortAscending
+              ? a.categoryName!.compareTo(b.categoryName!)
+              : b.categoryName!.compareTo(a.categoryName!));
+          break;
+      }
+    }
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    final sortCriteria = <String>['Name', 'Category Name'];
+
+    if (selectedSortCriteria != null &&
+        !sortCriteria.contains(selectedSortCriteria)) {
+      selectedSortCriteria = null;
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Products"),
@@ -70,6 +106,43 @@ class _ProductsScreenState extends State<ProductsScreen> {
         padding: defaultPadding,
         child: Column(
           children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                DropdownButton<String>(
+                  value: selectedSortCriteria,
+                  hint: const Text('Sort by'),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedSortCriteria = newValue;
+                      sortProducts();
+                    });
+                  },
+                  items: sortCriteria
+                      .map<DropdownMenuItem<String>>(
+                        (String value) => DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        ),
+                      )
+                      .toList(),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: inputPadding,
+                    child: FilterTextField(
+                      textInputType: TextInputType.number,
+                      addressController: searchController,
+                      label: "Filter by Price/Category ID",
+                      onChange: (value) {
+                        getProducts(filter: value);
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
             SearchTextField(
               rawQueryText: (value) async {
                 var sqlHelper = GetIt.I.get<SqlHelper>();

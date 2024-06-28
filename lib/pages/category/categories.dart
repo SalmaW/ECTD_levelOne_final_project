@@ -18,6 +18,9 @@ class CategoriesScreen extends StatefulWidget {
 class _CategoriesScreenState extends State<CategoriesScreen> {
   List<ClientData>? categories;
   final SqlHelper _dbHelper = SqlHelper();
+  bool sortAscending = true;
+  String? selectedSortCriteria;
+
   @override
   void initState() {
     getCategories();
@@ -41,11 +44,32 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       categories = [];
       print("Error in get data in categories: $e");
     }
+    sortCategories();
+  }
+
+  void sortCategories() {
+    if (categories != null && selectedSortCriteria != null) {
+      switch (selectedSortCriteria) {
+        case 'Name':
+          categories!.sort((a, b) => sortAscending
+              ? a.name!.compareTo(b.name!)
+              : b.name!.compareTo(a.name!));
+          break;
+      }
+    }
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    final sortCriteria = <String>['Name'];
+
+    // Ensure that the selectedSortCriteria is valid and in the list
+    if (selectedSortCriteria != null &&
+        !sortCriteria.contains(selectedSortCriteria)) {
+      selectedSortCriteria = null;
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Categories"),
@@ -66,6 +90,31 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         padding: defaultPadding,
         child: Column(
           children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                DropdownButton<String>(
+                  value: selectedSortCriteria,
+                  hint: const Text('Sort by'),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedSortCriteria =
+                          newValue; // Update selectedSortCriteria
+                      sortCategories(); // Sort clients based on new criteria
+                    });
+                  },
+                  items: sortCriteria
+                      .map<DropdownMenuItem<String>>(
+                        (String value) => DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
             SearchTextField(
               rawQueryText: (value) async {
                 var sqlHelper = GetIt.I.get<SqlHelper>();
@@ -85,7 +134,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                   DataColumn(label: Center(child: Text("Actions"))),
                 ],
                 source: CategoriesTableSource(
-                  categories: categories,
+                  categories: categories ?? [],
                   onUpdate: (categoryData) async {
                     var result = await Navigator.push(
                       context,

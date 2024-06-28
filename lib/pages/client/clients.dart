@@ -1,4 +1,5 @@
 import 'package:data_table_2/data_table_2.dart';
+import 'package:final_project/widgets/filter_textField.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import '../../utils/constants.dart';
@@ -17,6 +18,9 @@ class ClientsScreen extends StatefulWidget {
 
 class _ClientsScreenState extends State<ClientsScreen> {
   List<ClientData>? clients;
+  bool sortAscending = true;
+  String? selectedSortCriteria;
+  TextEditingController addressController = TextEditingController();
 
   @override
   void initState() {
@@ -24,11 +28,15 @@ class _ClientsScreenState extends State<ClientsScreen> {
     super.initState();
   }
 
-  void getClients() async {
+  void getClients({String? addressFilter}) async {
     try {
       var sqlHelper = GetIt.I.get<SqlHelper>();
+      var query = "SELECT * FROM Clients";
+      if (addressFilter != null && addressFilter.isNotEmpty) {
+        query += " WHERE address LIKE '%$addressFilter%'";
+      }
       var data =
-          await sqlHelper.db!.query("Clients"); //select all from categories
+          await sqlHelper.db!.rawQuery(query); //select all from categories
       if (data.isNotEmpty) {
         clients = [];
         for (var item in data) {
@@ -41,11 +49,38 @@ class _ClientsScreenState extends State<ClientsScreen> {
       clients = [];
       print("Error in get data in clients: $e");
     }
+    sortClients();
+  }
+
+  void sortClients() {
+    if (clients != null && selectedSortCriteria != null) {
+      switch (selectedSortCriteria) {
+        case 'Name':
+          clients!.sort((a, b) => sortAscending
+              ? a.name!.compareTo(b.name!)
+              : b.name!.compareTo(a.name!));
+          break;
+        case 'Email':
+          clients!.sort((a, b) => sortAscending
+              ? a.email!.compareTo(b.email!)
+              : b.email!.compareTo(a.email!));
+          break;
+        // Add more cases for additional criteria here
+      }
+    }
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    final sortCriteria = <String>['Name', 'Email'];
+
+    // Ensure that the selectedSortCriteria is valid and in the list
+    if (selectedSortCriteria != null &&
+        !sortCriteria.contains(selectedSortCriteria)) {
+      selectedSortCriteria = null;
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Clients"),
@@ -66,6 +101,43 @@ class _ClientsScreenState extends State<ClientsScreen> {
         padding: defaultPadding,
         child: Column(
           children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                DropdownButton<String>(
+                  value: selectedSortCriteria,
+                  hint: const Text('Sort by'),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedSortCriteria =
+                          newValue; // Update selectedSortCriteria
+                      sortClients(); // Sort clients based on new criteria
+                    });
+                  },
+                  items: sortCriteria
+                      .map<DropdownMenuItem<String>>(
+                        (String value) => DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        ),
+                      )
+                      .toList(),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: inputPadding,
+                    child: FilterTextField(
+                      addressController: addressController,
+                      label: "Filter by Address",
+                      onChange: (value) {
+                        getClients(addressFilter: value);
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
             SearchTextField(
               rawQueryText: (value) async {
                 var sqlHelper = GetIt.I.get<SqlHelper>();
@@ -88,7 +160,7 @@ class _ClientsScreenState extends State<ClientsScreen> {
                   DataColumn(label: Center(child: Text("Actions"))),
                 ],
                 source: ClientsTableSource(
-                  clients: clients,
+                  clients: clients ?? [],
                   onUpdate: (clients) async {
                     var result = await Navigator.push(
                       context,
@@ -169,8 +241,6 @@ class ClientsTableSource extends DataTableSource {
   @override
   DataRow? getRow(int index) {
     return DataRow2(
-      // onSelectChanged: (value) {},
-      // selected: true,
       cells: [
         DataCell(Text("${clients?[index].id}")),
         DataCell(Text("${clients?[index].name}")),

@@ -9,7 +9,7 @@ import '../widgets/app_button.dart';
 import '../models/order.dart';
 import '../models/order_item.dart';
 import '../models/product_data.dart';
-import 'currency_selection.dart';
+import '../widgets/currency_selection.dart';
 
 class SaleOp extends StatefulWidget {
   final Order? order;
