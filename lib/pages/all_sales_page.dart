@@ -169,25 +169,11 @@ class _AllSalesState extends State<AllSales> {
                                             const SizedBox(height: 20),
                                             const DashedSeparator(),
                                             const SizedBox(height: 20),
-                                            // Column(
-                                            //   crossAxisAlignment:
-                                            //       CrossAxisAlignment.stretch,
-                                            //   children: [
-                                            //     Text("Product names:"),
-                                            //     // Display each product name on a new line
-                                            //     ...order.productNames
-                                            //             ?.split(', ')
-                                            //             .map((productName) =>
-                                            //                 Text(productName))
-                                            //             .toList() ??
-                                            //         [],
-                                            //   ],
-                                            // ),
                                             Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.stretch,
                                               children: [
-                                                Text("Product details:"),
+                                                const Text("Product details:"),
                                                 // Handle empty or null productNames
                                                 if (order.productNames !=
                                                         null &&
@@ -255,35 +241,6 @@ class _AllSalesState extends State<AllSales> {
   double calculateProductPriceAfterDiscount(
       {required double discount, required double total}) {
     return (total - (total * discount));
-  }
-
-  convertPrice(var price, String fromCurrency, String toCurrency) {
-    final Map<String, double> exchangeRates = {
-      'EGPtoUSD': 0.021,
-      'EGPtoEUR': 0.02,
-      'USDtoEUR': 0.93,
-      'EURtoUSD': 1.07,
-      'USDtoEGP': 47.66,
-      'EURtoEGP': 51.13,
-    };
-
-    // if (fromCurrency == toCurrency) return price;
-    switch ("${fromCurrency}to$toCurrency") {
-      case 'EGPtoUSD':
-        return "${(price * exchangeRates['EGPtoUSD']).toStringAsFixed(4)} $selectedCurrencyText";
-      case 'EGPtoEUR':
-        return "${(price * exchangeRates['EGPtoEUR']).toStringAsFixed(4)} $selectedCurrencyText";
-      case 'USDtoEUR':
-        return "${(price * exchangeRates['USDtoEUR']).toStringAsFixed(4)} $selectedCurrencyText";
-      case 'EURtoUSD':
-        return "${(price * exchangeRates['EURtoUSD']).toStringAsFixed(4)} $selectedCurrencyText";
-      case 'USDtoEGP':
-        return "${(price * exchangeRates['USDtoEGP']).toStringAsFixed(4)} $selectedCurrencyText";
-      case 'EURtoEGP':
-        return "${(price * exchangeRates['EURtoEGP']).toStringAsFixed(4)} $selectedCurrencyText";
-      default:
-        return price;
-    }
   }
 
   String currencyConvertorLine(Currency currency) {

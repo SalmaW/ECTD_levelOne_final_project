@@ -65,7 +65,6 @@ class _ClientsScreenState extends State<ClientsScreen> {
               ? a.email!.compareTo(b.email!)
               : b.email!.compareTo(a.email!));
           break;
-        // Add more cases for additional criteria here
       }
     }
     setState(() {});
@@ -215,10 +214,6 @@ class _ClientsScreenState extends State<ClientsScreen> {
         },
       );
       if (dialogResult ?? false) {
-        // var result = await SqlHelper.deleteClient(clients![id]);
-        // if (result > 0) {
-        //   SqlHelper.getAllClients();
-        // }
         var sqlHelper = GetIt.I.get<SqlHelper>();
         var result = await sqlHelper.db!.delete(
           "Clients",

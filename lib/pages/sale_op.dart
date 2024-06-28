@@ -123,7 +123,6 @@ class _SaleOpState extends State<SaleOp> {
       setState(() {});
     } catch (e) {
       print('Error loading order items: $e');
-      // Handle error loading order items
     }
   }
 
