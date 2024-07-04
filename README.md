@@ -27,12 +27,30 @@ screens:
 
 ## Used Packages
 The following packages are used to build the Market Manager application:
-| Package name | Code |
-| ------ | ------ |
-|  |```yaml|
-| `sqflite` |<pre lang="yaml">  dependencies:&#13;    sqflite: ^2.3.3+1</pre>|
-| 400    |Some text here|
+| Package name | Description of why used | Code |
+| ------ | ------ | ------ |
+| `sqflite` | This is a Flutter plugin for SQLite, providing a local database solution for storing structured data |<pre lang="yaml">  dependencies:&#13;    sqflite_common_ffi_web: '>=0.1.0-dev.1'</pre>|
+| `sqflite_common_ffi_web` | This package is used to support sqflite on web platforms using FFI (Foreign Function Interface), enabling SQLite database operations in web-based Flutter applications. |<pre lang="yaml">  dependencies:&#13;    sqflite: ^2.3.3+1</pre>|
+| `data_table_2` | This package offers enhanced data table functionalities, improving upon Flutter's built-in DataTable widget with additional features and customizations. |<pre lang="yaml">  dependencies:&#13;    data_table_2: ^2.5.12</pre>|
+| `get_it` | A simple service locator for Dart and Flutter projects, facilitating dependency 
+injection to manage and access instances of classes or services. |<pre lang="yaml">  dependencies:&#13;    get_it: ^7.7.0</pre>|
+|`path & path_provider`|These packages are used for handling file system paths and providing platform-specific locations (like temporary and persistent storage directories) in Flutter applications.|<pre lang="yaml">  dependencies:&#13;    path: ^1.8.0&#13;     path_provider: ^2.0.2</pre>|
 
+to add web support to an existing sqflite application:
+```dart
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
+import 'package:sqflite/sqflite.dart';
 
+ var path = '/my/db/path';
+ if (kIsWeb) {
+  // Change default factory on the web
+  databaseFactory = databaseFactoryFfiWeb;
+  path = 'my_web_web.db';
+ }
+ 
+ // open the database
+ var db = openDatabase(path);
+
+```
 
 
