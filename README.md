@@ -32,9 +32,12 @@ The following packages are used to build the Market Manager application:
 | `sqflite` | This is a Flutter plugin for SQLite, providing a local database solution for storing structured data |<pre lang="yaml">  dependencies:&#13;    sqflite_common_ffi_web: '>=0.1.0-dev.1'</pre>|
 | `sqflite_common_ffi_web` | This package is used to support sqflite on web platforms using FFI (Foreign Function Interface), enabling SQLite database operations in web-based Flutter applications. |<pre lang="yaml">  dependencies:&#13;    sqflite: ^2.3.3+1</pre>|
 | `data_table_2` | This package offers enhanced data table functionalities, improving upon Flutter's built-in DataTable widget with additional features and customizations. |<pre lang="yaml">  dependencies:&#13;    data_table_2: ^2.5.12</pre>|
-| `get_it` | A simple service locator for Dart and Flutter projects, facilitating dependency 
-injection to manage and access instances of classes or services. |<pre lang="yaml">  dependencies:&#13;    get_it: ^7.7.0</pre>|
-|`path & path_provider`|These packages are used for handling file system paths and providing platform-specific locations (like temporary and persistent storage directories) in Flutter applications.|<pre lang="yaml">  dependencies:&#13;    path: ^1.8.0&#13;     path_provider: ^2.0.2</pre>|
+| `get_it` | A simple service locator for Dart and Flutter projects, facilitating dependency injection to manage and access instances of classes or services. |<pre lang="yaml">  dependencies:&#13;    get_it: ^7.7.0</pre>|
+| `path & path_provider` |These packages are used for handling file system paths and providing platform-specific locations (like temporary and persistent storage directories) in Flutter applications.|<pre lang="yaml">  dependencies:&#13;    path: ^1.8.0&#13;     path_provider: ^2.0.2</pre>|
+| `permission_handler` |  Simplifies handling runtime permissions in Flutter, allowing the application to request and check permissions easily. |<pre lang="yaml">  dependencies:&#13;    permission_handler: ^10.2.0</pre>|
+| `flutter_launcher_icons` | This package automates the process of updating app launcher icons across different platforms in a Flutter project. |<pre lang="yaml">  dependencies:&#13;    flutter_launcher_icons: ^0.13.1</pre>|
+| `intl` |  Provides internationalization and localization support in Flutter applications, offering tools to format dates, numbers, and strings according to different locales. |<pre lang="yaml">  dependencies:&#13;    intl: ^0.19.0</pre>|
+| `get` | A state management solution that helps in managing state across Flutter widgets and simplifies reactive programming patterns. |<pre lang="yaml">  dependencies:&#13;    get: ^4.4.6</pre>|
 
 to add web support to an existing sqflite application:
 ```dart
