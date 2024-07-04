@@ -30,7 +30,7 @@ The following packages are used to build the Market Manager application:
 | Package name | Code |
 | ------ | ------ |
 |  |```yaml|
-| `sqflite` |<br><pre lang="yaml"> dependencies: ;  sqflite: ^2.3.3+1;</pre>|
+| `sqflite` |<br><pre lang="yaml"> dependencies: <br>  sqflite: ^2.3.3+1</br></pre>|
 | 400    |Some text here|
 
 
