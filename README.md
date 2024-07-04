@@ -27,8 +27,8 @@ screens:
 
 ## Used Packages
 The following packages are used to build the Market Manager application:
-| Package name |         Why used         | Code |
-| -------- | ----------------- | ------ |
+| Package name | Why used | Code |
+| ------ | ------------------------------ | ------ |
 | `sqflite` | This is a Flutter plugin for SQLite, providing a local database solution for storing structured data |<pre lang="yaml">  dependencies:&#13;    sqflite: ^2.3.3+1</pre>|
 | `sqflite_common_ffi_web` | This package is used to support sqflite on web platforms using FFI (Foreign Function Interface), enabling SQLite database operations in web-based Flutter applications. |<pre lang="yaml">  dependencies:&#13;    sqflite_common_ffi_web: '>=0.1.0-dev.1'</pre>|
 | `data_table_2` | This package offers enhanced data table functionalities, improving upon Flutter's built-in DataTable widget with additional features and customizations. |<pre lang="yaml">  dependencies:&#13;    data_table_2: ^2.5.12</pre>|
