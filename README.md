@@ -29,11 +29,14 @@ screens:
 The following packages are used to build the Market Manager application:
 | Package name | Code |
 | ------ | ------ |
-| `sqflite` |
-```yaml
-dependencies: 
-sqflite: ^2.3.3+1 ```
-|
+| `sqflite` |```yaml|
+| 200    | `json`                          |
+|        | `   {`                          |
+|        | ` "id": 10,`                    |
+|        | ` "username": "alanpartridge",` |
+|        | ` more code...`                 |
+|        | `}`                             |
+| 400    |                                 |
 
 
 
