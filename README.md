@@ -2,7 +2,9 @@
 
 ## Purpose of Application
 Market Manager is responsible for managing a market throughout the phone. Using database to handle the market data such as Categories, Products, Orders, Currency, Clients, OrderItems and … etc. And the financial data such as Sale operation and the History of Sales of the market.
+
 The application replaces traditional paper-based methods, reducing waste and providing convenient access to essential data anytime, anywhere. It also supports currency exchange rates for EGP, USD, and EUR, allowing the Market Owner to switch currencies with a single click.
+
 To ensure data integrity, the application includes a feature that saves data to the latest version of the database in the device's local storage, contingent on user permission. Users can also choose not to restore data from previous sessions, in which case all previous data will be wiped.
 
 ## Application Usability
@@ -27,7 +29,11 @@ screens:
 The following packages are used to build the Market Manager application:
 | Package name | Code |
 | ------ | ------ |
-| `sqflite` | ```yaml dependencies: sqflite: ^2.3.3+1 ``` |
+| `sqflite` |
+```yaml
+dependencies: 
+sqflite: ^2.3.3+1 ```
+|
 
 
 
