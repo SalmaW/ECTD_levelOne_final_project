@@ -1,16 +1,34 @@
-# final_project
+# Market Manager App
 
-A new Flutter project.
+## Purpose of Application
+Market Manager is responsible for managing a market throughout the phone. Using database to handle the market data such as Categories, Products, Orders, Currency, Clients, OrderItems and … etc. And the financial data such as Sale operation and the History of Sales of the market.
+The application replaces traditional paper-based methods, reducing waste and providing convenient access to essential data anytime, anywhere. It also supports currency exchange rates for EGP, USD, and EUR, allowing the Market Owner to switch currencies with a single click.
+To ensure data integrity, the application includes a feature that saves data to the latest version of the database in the device's local storage, contingent on user permission. Users can also choose not to restore data from previous sessions, in which case all previous data will be wiped.
 
-## Getting Started
+## Application Usability
+The Market Manager app offers the following functionalities to market owners:
+  + Home Screen: Access to the five main screens: Category, Client, Product, Sale Operations, and All Sales.
+  + Category Management: Create and update categories, with all associated products reflecting changes.
+  + Client Management: Create and update clients, necessary for proceeding with sales.
+  + Product Management: Create and update products, each belonging to a specific category.
+  + Sale Operations: Record sales, including specific items purchased by clients and apply discounts to the total receipt.
+  + Sales History: View all past sales.
 
-This project is a starting point for a Flutter application.
+Users can delete categories, clients, products, and sales as needed, with the restriction that a category with products cannot be deleted until all related products are removed.
 
-A few resources to get you started if this is your first Flutter project:
+## Sorting and Filtering
+To facilitate data management, the application includes Sort and Filter functions on various 
+screens:
+  + Category Screen: Sort by Category Name.
+  + Clients Screen: Sort by Client Name or Email, and Filter by Address.
+  + Products Screen: Sort by Product Name or Category Name, and Filter by Price or Category ID
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Used Packages
+The following packages are used to build the Market Manager application:
+| Package name | Code |
+| ------ | ------ |
+| `sqflite` | ```yaml dependencies: sqflite: ^2.3.3+1 ``` |
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+
+
+
