@@ -1,8 +1,7 @@
 # Market Manager App
 
 ## Demo 
-[here](https://drive.google.com/file/d/1TneMKTdIbi4yL0GpJh-i6ZGjeG6yUrwU/view?usp=sharing)
-
+https://github.com/user-attachments/assets/5f3aebfd-5bdf-4aea-be69-12974f76aed2
 
 ## Purpose of Application
 Market Manager is responsible for managing a market throughout the phone. Using database to handle the market data such as Categories, Products, Orders, Currency, Clients, OrderItems and … etc. And the financial data such as Sale operation and the History of Sales of the market.
